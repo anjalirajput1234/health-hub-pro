@@ -155,8 +155,8 @@ export const useReminders = create<RState>()(
 );
 
 // ---------- Health records ----------
-export type Record = { id: string; name: string; type: string; size: number; date: string; dataUrl: string };
-type RecState = { items: Record[]; add: (r: Omit<Record, "id" | "date">) => void; remove: (id: string) => void };
+export type HealthRecord = { id: string; name: string; type: string; size: number; date: string; dataUrl: string };
+type RecState = { items: HealthRecord[]; add: (r: Omit<HealthRecord, "id" | "date">) => void; remove: (id: string) => void };
 export const useRecords = create<RecState>()(
   persist(
     (set) => ({
