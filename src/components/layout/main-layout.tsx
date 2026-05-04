@@ -1,234 +1,202 @@
-import { Link, useLocation } from "wouter";
-import { Stethoscope, User, Hospital, Activity, HeartPulse, Menu, LogOut, LayoutDashboard } from "lucide-react";
+import { Link, useLocation, NavLink } from "react-router-dom";
+import { Stethoscope, Hospital, Activity, Home, LayoutDashboard, Menu, Moon, Sun, User, LogOut, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { ChatbotWidget } from "@/components/chatbot-widget";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth, getInitials } from "@/context/auth";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
-  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { useTheme } from "@/hooks/use-theme";
+import { motion } from "framer-motion";
+import { toast } from "sonner";
 
-interface MainLayoutProps {
-  children: React.ReactNode;
-}
+const navItems = [
+  { to: "/", label: "Home", icon: Home },
+  { to: "/doctors", label: "Doctors", icon: Stethoscope },
+  { to: "/hospitals", label: "Hospitals", icon: Hospital },
+  { to: "/dashboard", label: "Bookings", icon: LayoutDashboard },
+  { to: "/chatbot", label: "AI Check", icon: Activity },
+];
 
-export function MainLayout({ children }: MainLayoutProps) {
-  const [location] = useLocation();
-  const { user, logout } = useAuth();
-
-  const navItems = [
-    { href: "/", label: "Home", icon: HeartPulse },
-    { href: "/hospitals", label: "Hospitals", icon: Hospital },
-    { href: "/doctors", label: "Doctors", icon: Stethoscope },
-    { href: "/dashboard", label: "My Appointments", icon: LayoutDashboard },
-    { href: "/chatbot", label: "AI Symptom Checker", icon: Activity },
-  ];
+export function MainLayout({ children }: { children: React.ReactNode }) {
+  const { pathname } = useLocation();
+  const { user, signOut } = useAuth();
+  const { theme, toggle } = useTheme();
+  const isAuthRoute = pathname === "/login";
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
-      <header className="sticky top-0 z-50 w-full border-b bg-white shadow-sm">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="bg-primary/10 p-2 rounded-lg group-hover:bg-primary/20 transition-colors">
-              <Stethoscope className="w-6 h-6 text-primary" />
+    <div className="min-h-screen flex flex-col bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-40 w-full border-b border-border/60 backdrop-blur-xl bg-background/75">
+        <div className="container mx-auto h-16 flex items-center justify-between gap-4">
+          <Link to="/" className="flex items-center gap-2.5 group">
+            <div className="w-9 h-9 rounded-xl bg-gradient-primary grid place-items-center shadow-glow group-hover:scale-105 transition-transform">
+              <Stethoscope className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-              DoctorKhoj
-            </span>
+            <span className="text-xl font-display font-bold gradient-text">DoctorKhoj</span>
           </Link>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-6">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`text-sm font-medium transition-colors hover:text-primary ${
-                  location === item.href ? "text-primary" : "text-slate-600"
-                }`}
+          <nav className="hidden lg:flex items-center gap-1">
+            {navItems.map((it) => (
+              <NavLink
+                key={it.to}
+                to={it.to}
+                className={({ isActive }) =>
+                  `relative px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                    isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                  }`
+                }
               >
-                {item.label}
-              </Link>
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <motion.span
+                        layoutId="navpill"
+                        className="absolute inset-0 rounded-full bg-primary/10"
+                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                      />
+                    )}
+                    <span className="relative">{it.label}</span>
+                  </>
+                )}
+              </NavLink>
             ))}
           </nav>
 
-          {/* Desktop right side */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" onClick={toggle} aria-label="Toggle theme" className="rounded-full">
+              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </Button>
+
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2.5 rounded-full pr-3 pl-1 py-1 border border-slate-200 hover:border-primary/40 hover:bg-primary/5 transition-all">
-                    <div
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-                      style={{ backgroundColor: user.avatarColor || "#3b82f6" }}
-                    >
-                      {getInitials(user.name)}
+                  <button className="hidden sm:flex items-center gap-2 rounded-full pr-3 pl-1 py-1 border border-border hover:border-primary/50 transition-colors">
+                    <div className="w-7 h-7 rounded-full bg-gradient-primary text-primary-foreground grid place-items-center text-xs font-bold">
+                      {getInitials(user.email)}
                     </div>
-                    <div className="text-left">
-                      <p className="text-xs font-semibold text-slate-800 leading-tight">{user.name.split(" ")[0]}</p>
-                      <p className="text-xs text-slate-500 leading-tight truncate max-w-[100px]">{user.email}</p>
-                    </div>
+                    <span className="text-sm font-medium hidden md:inline">{user.email?.split("@")[0]}</span>
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-52">
-                  <DropdownMenuLabel className="font-normal">
-                    <p className="font-semibold text-slate-900 truncate">{user.name}</p>
-                    <p className="text-xs text-slate-500 truncate">{user.email}</p>
-                  </DropdownMenuLabel>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel className="truncate">{user.email}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/profile" className="flex items-center gap-2 cursor-pointer">
-                      <User className="w-4 h-4" /> My Profile
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard" className="flex items-center gap-2 cursor-pointer">
-                      <LayoutDashboard className="w-4 h-4" /> Dashboard
-                    </Link>
-                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link to="/profile"><User className="w-4 h-4 mr-2" />Profile</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link to="/dashboard"><LayoutDashboard className="w-4 h-4 mr-2" />My bookings</Link></DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={logout}
-                    className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer flex items-center gap-2"
-                  >
-                    <LogOut className="w-4 h-4" /> Log Out
+                  <DropdownMenuItem onClick={() => signOut().then(() => toast.success("Signed out"))} className="text-destructive">
+                    <LogOut className="w-4 h-4 mr-2" />Sign out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <>
-                <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-primary transition-colors">
-                  Log in
-                </Link>
-                <Button asChild>
-                  <Link href="/login">Book Appointment</Link>
-                </Button>
-              </>
-            )}
-          </div>
-
-          {/* Mobile Nav */}
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
-                <Menu className="w-6 h-6" />
-                <span className="sr-only">Toggle menu</span>
+              <Button asChild className="hidden sm:inline-flex rounded-full bg-gradient-primary shadow-glow border-0">
+                <Link to="/login">Sign in</Link>
               </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[360px]">
-              {user && (
-                <div className="flex items-center gap-3 px-4 py-4 mb-2 bg-slate-50 rounded-xl mt-4">
-                  <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shrink-0"
-                    style={{ backgroundColor: user.avatarColor || "#3b82f6" }}
-                  >
-                    {getInitials(user.name)}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-slate-900 truncate">{user.name}</p>
-                    <p className="text-xs text-slate-500 truncate">{user.email}</p>
-                  </div>
+            )}
+
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon" className="lg:hidden rounded-full">
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[300px]">
+                <div className="mt-8 flex flex-col gap-1">
+                  {navItems.map((it) => (
+                    <NavLink
+                      key={it.to}
+                      to={it.to}
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium ${
+                          isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"
+                        }`
+                      }
+                    >
+                      <it.icon className="w-4 h-4" /> {it.label}
+                    </NavLink>
+                  ))}
+                  {!user && (
+                    <Button asChild className="mt-4 rounded-full bg-gradient-primary border-0">
+                      <Link to="/login">Sign in</Link>
+                    </Button>
+                  )}
                 </div>
-              )}
-
-              <nav className="flex flex-col gap-1 mt-4">
-                {navItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                      location === item.href
-                        ? "bg-primary/10 text-primary font-medium"
-                        : "text-slate-600 hover:bg-slate-100"
-                    }`}
-                  >
-                    <item.icon className="w-5 h-5" />
-                    {item.label}
-                  </Link>
-                ))}
-
-                {user && (
-                  <Link href="/profile"
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors">
-                    <User className="w-5 h-5" /> My Profile
-                  </Link>
-                )}
-              </nav>
-
-              <div className="mt-4 px-1 flex flex-col gap-2">
-                {user ? (
-                  <Button variant="outline" className="w-full justify-start text-red-600 border-red-200 hover:bg-red-50" onClick={logout}>
-                    <LogOut className="w-4 h-4 mr-2" /> Log Out
-                  </Button>
-                ) : (
-                  <>
-                    <Button variant="outline" className="w-full justify-start" asChild>
-                      <Link href="/login">Log in</Link>
-                    </Button>
-                    <Button className="w-full justify-start" asChild>
-                      <Link href="/login">Book Appointment</Link>
-                    </Button>
-                  </>
-                )}
-              </div>
-            </SheetContent>
-          </Sheet>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </header>
 
-      <main className="flex-1">
-        {children}
-      </main>
+      <main className="flex-1 pb-20 lg:pb-0">{children}</main>
 
-      {/* Floating chatbot widget — hidden on the full chatbot page */}
-      {location !== "/chatbot" && <ChatbotWidget />}
+      {/* Floating Emergency button */}
+      {!isAuthRoute && (
+        <a
+          href="tel:108"
+          className="fixed right-5 bottom-24 lg:bottom-8 z-30 group"
+          aria-label="Emergency"
+        >
+          <span className="absolute inset-0 rounded-full bg-destructive animate-pulse-glow" />
+          <span className="relative flex items-center gap-2 bg-destructive text-destructive-foreground px-4 h-12 rounded-full font-semibold shadow-elevated hover:scale-105 transition-transform">
+            <Phone className="w-4 h-4" /> <span className="hidden sm:inline">Emergency</span>
+          </span>
+        </a>
+      )}
 
-      <footer className="bg-slate-900 text-slate-300 py-12 mt-12">
-        <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div>
-            <Link href="/" className="flex items-center gap-2 mb-4">
-              <Stethoscope className="w-6 h-6 text-blue-400" />
-              <span className="text-xl font-bold text-white">DoctorKhoj</span>
-            </Link>
-            <p className="text-sm text-slate-400 mb-4">
-              Your trusted healthcare guide in Palamu, Jharkhand. Making quality healthcare accessible to everyone.
-            </p>
-          </div>
-
-          <div>
-            <h3 className="font-semibold text-white mb-4">For Patients</h3>
-            <ul className="space-y-2 text-sm">
-              <li><Link href="/doctors" className="hover:text-blue-400 transition-colors">Find a Doctor</Link></li>
-              <li><Link href="/hospitals" className="hover:text-blue-400 transition-colors">Hospitals</Link></li>
-              <li><Link href="/dashboard" className="hover:text-blue-400 transition-colors">My Appointments</Link></li>
-              <li><Link href="/chatbot" className="hover:text-blue-400 transition-colors">AI Symptom Checker</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="font-semibold text-white mb-4">Services</h3>
-            <ul className="space-y-2 text-sm">
-              <li><span className="hover:text-blue-400 transition-colors cursor-pointer">Online Booking</span></li>
-              <li><span className="hover:text-blue-400 transition-colors cursor-pointer">Digital OPD Parchi</span></li>
-              <li><span className="hover:text-blue-400 transition-colors cursor-pointer">Online Payments</span></li>
-              <li><Link href="/join" className="hover:text-blue-400 transition-colors">Join as Partner Hospital</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="font-semibold text-white mb-4">Contact</h3>
-            <ul className="space-y-2 text-sm">
-              <li>Helpdesk: +91 1800 123 4567</li>
-              <li>Email: support@doctorkhoj.in</li>
-              <li>Location: Daltonganj, Palamu, Jharkhand 822101</li>
-            </ul>
-          </div>
+      {/* Mobile bottom nav */}
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/90 backdrop-blur-xl">
+        <div className="grid grid-cols-5 h-16">
+          {navItems.map((it) => (
+            <NavLink
+              key={it.to}
+              to={it.to}
+              className={({ isActive }) =>
+                `flex flex-col items-center justify-center gap-0.5 text-[11px] ${
+                  isActive ? "text-primary" : "text-muted-foreground"
+                }`
+              }
+            >
+              <it.icon className="w-5 h-5" />
+              {it.label}
+            </NavLink>
+          ))}
         </div>
-        <div className="container mx-auto px-4 mt-8 pt-8 border-t border-slate-800 text-sm text-center text-slate-500">
-          © {new Date().getFullYear()} DoctorKhoj. All rights reserved. · An initiative by an IIT Patna student for Palamu, Jharkhand.
-        </div>
-      </footer>
+      </nav>
+
+      {/* Footer */}
+      {!isAuthRoute && (
+        <footer className="hidden lg:block border-t border-border/60 mt-20 bg-gradient-soft">
+          <div className="container mx-auto py-12 grid grid-cols-4 gap-8 text-sm">
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-lg bg-gradient-primary grid place-items-center"><Stethoscope className="w-4 h-4 text-primary-foreground" /></div>
+                <span className="font-display font-bold">DoctorKhoj</span>
+              </div>
+              <p className="text-muted-foreground">Premium healthcare access for every Indian family.</p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-3">Patients</h4>
+              <ul className="space-y-2 text-muted-foreground">
+                <li><Link to="/doctors" className="hover:text-foreground">Find doctors</Link></li>
+                <li><Link to="/hospitals" className="hover:text-foreground">Hospitals</Link></li>
+                <li><Link to="/chatbot" className="hover:text-foreground">AI symptom checker</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-3">Account</h4>
+              <ul className="space-y-2 text-muted-foreground">
+                <li><Link to="/dashboard" className="hover:text-foreground">My bookings</Link></li>
+                <li><Link to="/profile" className="hover:text-foreground">Profile</Link></li>
+                <li><Link to="/login" className="hover:text-foreground">Sign in</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-3">Emergency</h4>
+              <p className="text-muted-foreground">Dial <a href="tel:108" className="text-destructive font-semibold">108</a> for ambulance services anywhere in India.</p>
+            </div>
+          </div>
+          <div className="border-t border-border py-4 text-center text-xs text-muted-foreground">© {new Date().getFullYear()} DoctorKhoj. Built with care.</div>
+        </footer>
+      )}
     </div>
   );
 }
