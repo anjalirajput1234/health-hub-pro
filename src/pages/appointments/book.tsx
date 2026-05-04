@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { MOCK_DOCTORS } from "@/lib/mock-data";
+import { useAppointments, useLoyalty, usePayments, useNotifs } from "@/store/app";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
@@ -21,6 +22,10 @@ export default function Book() {
   const { doctorId } = useParams();
   const nav = useNavigate();
   const doc = MOCK_DOCTORS.find((d) => d.id === doctorId) || MOCK_DOCTORS[0];
+  const addAppt = useAppointments((s) => s.add);
+  const addPoints = useLoyalty((s) => s.add);
+  const addPayment = usePayments((s) => s.add);
+  const addNotif = useNotifs((s) => s.add);
 
   const [day, setDay] = useState(0);
   const [slot, setSlot] = useState<string | null>(null);
@@ -37,9 +42,17 @@ export default function Book() {
     if (!name || !phone) { toast.error("Please enter your name and phone"); return; }
     setSubmitting(true);
     await new Promise((r) => setTimeout(r, 900));
+    addAppt({
+      doctorId: doc.id, doctorName: doc.name, doctorPhoto: doc.photo,
+      specialization: doc.specialization, date: days[day].toISOString(), time: slot,
+      mode: mode as "clinic" | "video", feeINR: doc.feeINR, hospital: doc.hospital,
+    });
+    addPayment({ description: `Consultation • ${doc.name}`, amount: doc.feeINR, date: new Date().toISOString(), status: "paid", method: "UPI" });
+    addPoints(50);
+    addNotif({ title: "Appointment confirmed", body: `${doc.name} on ${days[day].toLocaleDateString("en-IN", { day: "numeric", month: "short" })} at ${slot}`, kind: "appointment" });
     setSubmitting(false);
     setDone(true);
-    toast.success("Appointment confirmed!");
+    toast.success("Appointment confirmed! +50 loyalty points");
   };
 
   if (done) {
