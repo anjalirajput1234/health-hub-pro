@@ -18,6 +18,14 @@ export default function Login() {
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const friendly = (msg: string) => {
+    const m = msg.toLowerCase();
+    if (m.includes("invalid") && m.includes("credential")) return "Email or password is incorrect. New here? Create an account.";
+    if (m.includes("not confirmed") || m.includes("confirm")) return "Please confirm your email first, then sign in.";
+    if (m.includes("rate")) return "Too many attempts. Please wait a moment and try again.";
+    return msg;
+  };
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -27,7 +35,7 @@ export default function Login() {
       toast.success("Welcome back!");
       nav(from, { replace: true });
     } catch (err: any) {
-      toast.error(err.message || "Sign-in failed");
+      toast.error(friendly(err.message || "Sign-in failed"));
     } finally {
       setLoading(false);
     }
