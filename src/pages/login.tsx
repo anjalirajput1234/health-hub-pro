@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, Stethoscope, Shield, Sparkles, Heart, Activity, ChevronDown } from "lucide-react";
+import { Eye, EyeOff, Stethoscope, Shield, Sparkles, Heart, Activity, ChevronDown, Star, CheckCircle2, Users, Calendar, Award, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
