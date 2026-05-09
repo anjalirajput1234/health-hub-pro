@@ -41,18 +41,38 @@ export default function Login() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-gradient-soft">
       {/* HERO */}
-      <section className="relative min-h-screen flex flex-col">
-        <div className="absolute inset-0 bg-gradient-hero opacity-90" />
+      <section className="relative min-h-screen flex flex-col overflow-hidden">
+        {/* Layered backgrounds */}
+        <div className="absolute inset-0 bg-gradient-hero" />
+        <div className="absolute inset-0 opacity-[0.07] [background-image:linear-gradient(to_right,white_1px,transparent_1px),linear-gradient(to_bottom,white_1px,transparent_1px)] [background-size:48px_48px] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]" />
         <div className="absolute inset-0">
-          <div className="absolute top-10 left-10 w-72 h-72 rounded-full bg-white/20 blur-3xl animate-float" />
-          <div className="absolute bottom-20 right-10 w-96 h-96 rounded-full bg-accent/30 blur-3xl animate-float" style={{ animationDelay: "1s" }} />
+          <motion.div
+            animate={{ scale: [1, 1.15, 1], x: [0, 30, 0] }}
+            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-10 -left-10 w-80 h-80 rounded-full bg-white/25 blur-3xl"
+          />
+          <motion.div
+            animate={{ scale: [1.1, 1, 1.1], x: [0, -40, 0] }}
+            transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute bottom-10 -right-10 w-[28rem] h-[28rem] rounded-full bg-accent/40 blur-3xl"
+          />
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] aspect-square rounded-full border border-white/10"
+          />
+          <motion.div
+            animate={{ rotate: -360 }}
+            transition={{ duration: 80, repeat: Infinity, ease: "linear" }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] aspect-square rounded-full border border-white/10"
+          />
         </div>
 
         {/* Floating particles */}
         {Array.from({ length: 18 }).map((_, i) => (
           <motion.span
             key={i}
-            className="absolute w-1.5 h-1.5 rounded-full bg-white/40"
+            className="absolute w-1.5 h-1.5 rounded-full bg-white/50"
             initial={{ opacity: 0 }}
             animate={{
               opacity: [0, 1, 0],
@@ -64,69 +84,241 @@ export default function Login() {
           />
         ))}
 
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-primary-foreground px-6 py-16 text-center">
-          <motion.div
-            initial={{ scale: 0.5, opacity: 0, rotate: -20 }}
-            animate={{ scale: 1, opacity: 1, rotate: 0 }}
-            transition={{ duration: 0.8, type: "spring" }}
-            className="w-20 h-20 rounded-3xl bg-white/15 backdrop-blur-xl grid place-items-center shadow-elevated mb-6"
-          >
-            <Stethoscope className="w-10 h-10" />
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.7 }}
-            className="text-5xl sm:text-6xl lg:text-7xl font-display font-bold tracking-tight"
-          >
+        {/* Top brand bar */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="relative z-10 flex items-center justify-between px-6 sm:px-10 pt-6 text-primary-foreground"
+        >
+          <div className="inline-flex items-center gap-2 font-display font-bold">
+            <div className="w-9 h-9 rounded-xl bg-white/15 backdrop-blur-md grid place-items-center">
+              <Stethoscope className="w-5 h-5" />
+            </div>
             DoctorKhoj
-          </motion.h1>
+          </div>
+          <Link to="/register" className="text-sm font-medium px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition">
+            Sign up
+          </Link>
+        </motion.div>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.7 }}
-            className="mt-4 text-lg sm:text-xl opacity-90 max-w-md"
-          >
-            Premium healthcare for every Indian family — verified doctors, instant bookings, AI-powered care.
-          </motion.p>
+        <div className="relative z-10 flex-1 grid lg:grid-cols-[1.2fr_1fr] items-center gap-10 px-6 sm:px-10 py-10 lg:py-16 max-w-7xl mx-auto w-full">
+          {/* Left content */}
+          <div className="text-primary-foreground text-center lg:text-left">
+            <motion.span
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-xs font-medium"
+            >
+              <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
+              India's most trusted health platform
+            </motion.span>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7, duration: 0.7 }}
-            className="mt-8 flex flex-wrap justify-center gap-3 text-sm"
-          >
-            {[
-              { i: Shield, t: "Verified Doctors" },
-              { i: Sparkles, t: "AI Symptom Check" },
-              { i: Heart, t: "Emergency Access" },
-              { i: Activity, t: "24/7 Support" },
-            ].map((f, idx) => (
-              <motion.span
-                key={f.t}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.9 + idx * 0.1 }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/20"
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.7 }}
+              className="mt-5 text-5xl sm:text-6xl lg:text-7xl font-display font-bold tracking-tight leading-[1.05]"
+            >
+              Your health,{" "}
+              <span className="relative inline-block">
+                <span className="relative z-10">simplified.</span>
+                <motion.span
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ delay: 1, duration: 0.8 }}
+                  className="absolute left-0 bottom-1 h-3 w-full bg-accent/50 rounded-full origin-left -z-0"
+                />
+              </span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.7 }}
+              className="mt-5 text-base sm:text-lg opacity-90 max-w-xl mx-auto lg:mx-0"
+            >
+              Book verified doctors, get instant video consultations, and manage your family's health — all in one beautiful app.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7, duration: 0.7 }}
+              className="mt-7 flex flex-wrap justify-center lg:justify-start gap-2 text-sm"
+            >
+              {[
+                { i: Shield, t: "Verified Doctors" },
+                { i: Sparkles, t: "AI Symptom Check" },
+                { i: Heart, t: "Emergency Access" },
+                { i: Activity, t: "24/7 Support" },
+              ].map((f, idx) => (
+                <motion.span
+                  key={f.t}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.9 + idx * 0.08 }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/20"
+                >
+                  <f.i className="w-3.5 h-3.5" /> {f.t}
+                </motion.span>
+              ))}
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1, duration: 0.6 }}
+              className="mt-8 flex flex-wrap justify-center lg:justify-start gap-3"
+            >
+              <Button
+                onClick={scrollToForm}
+                className="h-12 px-7 rounded-full bg-white text-primary hover:bg-white/90 font-semibold shadow-elevated"
               >
-                <f.i className="w-3.5 h-3.5" /> {f.t}
-              </motion.span>
-            ))}
-          </motion.div>
+                Get started free
+              </Button>
+              <Button
+                variant="outline"
+                onClick={scrollToForm}
+                className="h-12 px-7 rounded-full bg-transparent border-white/40 text-primary-foreground hover:bg-white/10 hover:text-primary-foreground font-medium"
+              >
+                I already have an account
+              </Button>
+            </motion.div>
 
-          <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1, y: [0, 8, 0] }}
-            transition={{ delay: 1.4, y: { duration: 2, repeat: Infinity } }}
-            onClick={scrollToForm}
-            className="mt-12 inline-flex flex-col items-center gap-1 text-sm opacity-80 hover:opacity-100"
-          >
-            Sign in to continue
-            <ChevronDown className="w-5 h-5" />
-          </motion.button>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.2 }}
+              className="mt-8 flex items-center justify-center lg:justify-start gap-4 text-sm"
+            >
+              <div className="flex -space-x-2">
+                {["A", "R", "M", "S"].map((c, i) => (
+                  <div key={i} className="w-9 h-9 rounded-full bg-gradient-to-br from-white to-accent/60 border-2 border-primary grid place-items-center text-primary font-bold text-xs">
+                    {c}
+                  </div>
+                ))}
+              </div>
+              <div>
+                <div className="flex items-center gap-1 text-warning">
+                  {[0,1,2,3,4].map(i => <Star key={i} className="w-3.5 h-3.5 fill-warning" />)}
+                  <span className="text-primary-foreground ml-1 font-semibold">4.9</span>
+                </div>
+                <div className="text-xs opacity-80">from 1.2M+ patients</div>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Right visual: floating cards */}
+          <div className="relative hidden lg:block h-[520px]">
+            <motion.div
+              animate={{ rotate: [0, 360] }}
+              transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+              className="absolute inset-10 rounded-full border-2 border-dashed border-white/20"
+            />
+            <motion.div
+              animate={{ scale: [1, 1.05, 1] }}
+              transition={{ duration: 3, repeat: Infinity }}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full bg-white/15 backdrop-blur-2xl border border-white/30 grid place-items-center shadow-elevated"
+            >
+              <Heart className="w-16 h-16 text-primary-foreground" fill="currentColor" />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0, y: [0, -10, 0] }}
+              transition={{ x: { delay: 0.6 }, opacity: { delay: 0.6 }, y: { duration: 4, repeat: Infinity, ease: "easeInOut" } }}
+              className="absolute top-4 left-0 glass-strong rounded-2xl p-4 w-56 text-foreground"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-primary grid place-items-center">
+                  <Calendar className="w-5 h-5 text-primary-foreground" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Next appointment</p>
+                  <p className="font-display font-semibold text-sm">Today, 4:30 PM</p>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0, y: [0, 10, 0] }}
+              transition={{ x: { delay: 0.8 }, opacity: { delay: 0.8 }, y: { duration: 5, repeat: Infinity, ease: "easeInOut" } }}
+              className="absolute top-16 right-0 glass-strong rounded-2xl p-4 w-52 text-foreground"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <Video className="w-4 h-4 text-primary" />
+                <p className="text-xs font-medium">Video consult</p>
+                <span className="ml-auto w-2 h-2 rounded-full bg-secondary animate-pulse" />
+              </div>
+              <p className="text-xs text-muted-foreground">Dr. Priya Mehta is online</p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: [0, -8, 0] }}
+              transition={{ opacity: { delay: 1 }, y: { duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 1 } }}
+              className="absolute bottom-16 left-4 glass-strong rounded-2xl p-4 w-60 text-foreground"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-secondary/15 grid place-items-center">
+                  <CheckCircle2 className="w-5 h-5 text-secondary" />
+                </div>
+                <div>
+                  <p className="font-display font-semibold text-sm">Prescription ready</p>
+                  <p className="text-xs text-muted-foreground">Tap to download</p>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: [0, 10, 0] }}
+              transition={{ opacity: { delay: 1.2 }, y: { duration: 5.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 } }}
+              className="absolute bottom-4 right-4 glass-strong rounded-2xl p-4 w-44 text-foreground"
+            >
+              <Award className="w-5 h-5 text-warning mb-2" />
+              <p className="text-2xl font-display font-bold">12,500+</p>
+              <p className="text-xs text-muted-foreground">verified doctors</p>
+            </motion.div>
+          </div>
         </div>
+
+        {/* Stats strip */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.3, duration: 0.6 }}
+          className="relative z-10 mx-6 sm:mx-10 mb-6 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 px-4 sm:px-8 py-4 grid grid-cols-2 sm:grid-cols-4 gap-4 text-primary-foreground"
+        >
+          {[
+            { i: Users, n: "1.2M+", l: "Patients" },
+            { i: Stethoscope, n: "12.5K+", l: "Doctors" },
+            { i: Calendar, n: "50K+", l: "Bookings/mo" },
+            { i: Award, n: "4.9★", l: "Rating" },
+          ].map((s) => (
+            <div key={s.l} className="flex items-center gap-3">
+              <s.i className="w-5 h-5 opacity-80 shrink-0" />
+              <div>
+                <div className="font-display font-bold text-lg leading-tight">{s.n}</div>
+                <div className="text-xs opacity-80">{s.l}</div>
+              </div>
+            </div>
+          ))}
+        </motion.div>
+
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, y: [0, 6, 0] }}
+          transition={{ delay: 1.5, y: { duration: 2, repeat: Infinity } }}
+          onClick={scrollToForm}
+          className="relative z-10 mx-auto mb-6 inline-flex flex-col items-center gap-1 text-xs text-primary-foreground/80 hover:text-primary-foreground"
+        >
+          Scroll to sign in
+          <ChevronDown className="w-5 h-5" />
+        </motion.button>
       </section>
 
       {/* FORM */}
