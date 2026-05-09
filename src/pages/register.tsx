@@ -20,22 +20,46 @@ export default function Register() {
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const strength = (() => {
+    let s = 0;
+    if (password.length >= 8) s++;
+    if (/[A-Z]/.test(password)) s++;
+    if (/[0-9]/.test(password)) s++;
+    if (/[^A-Za-z0-9]/.test(password)) s++;
+    return s; // 0..4
+  })();
+  const strengthLabel = ["Too weak", "Weak", "Okay", "Strong", "Very strong"][strength];
+  const strengthColor = ["bg-destructive", "bg-destructive", "bg-warning", "bg-secondary", "bg-secondary"][strength];
+
+  const friendly = (msg: string) => {
+    const m = msg.toLowerCase();
+    if (m.includes("weak") || m.includes("pwned")) return "This password is too common. Try adding numbers, symbols, or making it longer.";
+    if (m.includes("already") || m.includes("registered")) return "This email is already registered. Please sign in instead.";
+    if (m.includes("invalid") && m.includes("email")) return "Please enter a valid email address.";
+    if (m.includes("rate")) return "Too many attempts. Please wait a moment and try again.";
+    return msg;
+  };
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirm) return toast.error("Passwords don't match");
-    if (password.length < 6) return toast.error("Password must be at least 6 characters");
+    if (password.length < 8) return toast.error("Password must be at least 8 characters");
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email, password,
         options: { emailRedirectTo: `${window.location.origin}/home`, data: { name, phone } },
       });
       if (error) throw error;
       updateProfile({ name, email, phone });
-      toast.success("Account created — check your email if confirmation is required.");
+      // Auto sign-in fallback if no session returned
+      if (!data.session) {
+        await supabase.auth.signInWithPassword({ email, password });
+      }
+      toast.success("Welcome to DoctorKhoj!");
       nav("/home");
     } catch (err: any) {
-      toast.error(err.message || "Registration failed");
+      toast.error(friendly(err.message || "Registration failed"));
     } finally { setLoading(false); }
   };
 
