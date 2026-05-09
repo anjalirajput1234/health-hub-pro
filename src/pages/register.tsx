@@ -20,22 +20,46 @@ export default function Register() {
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const strength = (() => {
+    let s = 0;
+    if (password.length >= 8) s++;
+    if (/[A-Z]/.test(password)) s++;
+    if (/[0-9]/.test(password)) s++;
+    if (/[^A-Za-z0-9]/.test(password)) s++;
+    return s; // 0..4
+  })();
+  const strengthLabel = ["Too weak", "Weak", "Okay", "Strong", "Very strong"][strength];
+  const strengthColor = ["bg-destructive", "bg-destructive", "bg-warning", "bg-secondary", "bg-secondary"][strength];
+
+  const friendly = (msg: string) => {
+    const m = msg.toLowerCase();
+    if (m.includes("weak") || m.includes("pwned")) return "This password is too common. Try adding numbers, symbols, or making it longer.";
+    if (m.includes("already") || m.includes("registered")) return "This email is already registered. Please sign in instead.";
+    if (m.includes("invalid") && m.includes("email")) return "Please enter a valid email address.";
+    if (m.includes("rate")) return "Too many attempts. Please wait a moment and try again.";
+    return msg;
+  };
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirm) return toast.error("Passwords don't match");
-    if (password.length < 6) return toast.error("Password must be at least 6 characters");
+    if (password.length < 8) return toast.error("Password must be at least 8 characters");
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email, password,
         options: { emailRedirectTo: `${window.location.origin}/home`, data: { name, phone } },
       });
       if (error) throw error;
       updateProfile({ name, email, phone });
-      toast.success("Account created — check your email if confirmation is required.");
+      // Auto sign-in fallback if no session returned
+      if (!data.session) {
+        await supabase.auth.signInWithPassword({ email, password });
+      }
+      toast.success("Welcome to DoctorKhoj!");
       nav("/home");
     } catch (err: any) {
-      toast.error(err.message || "Registration failed");
+      toast.error(friendly(err.message || "Registration failed"));
     } finally { setLoading(false); }
   };
 
@@ -85,11 +109,23 @@ export default function Register() {
           <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.34 }}>
             <Label htmlFor="pwd">Password</Label>
             <div className="relative mt-1.5">
-              <Input id="pwd" type={show ? "text" : "password"} required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="h-12 rounded-xl pr-11" />
+              <Input id="pwd" type={show ? "text" : "password"} required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} className="h-12 rounded-xl pr-11" placeholder="At least 8 characters" />
               <button type="button" onClick={() => setShow((s) => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                 {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
+            {password && (
+              <div className="mt-2">
+                <div className="flex gap-1">
+                  {[0,1,2,3].map(i => (
+                    <div key={i} className={`h-1.5 flex-1 rounded-full transition-colors ${i < strength ? strengthColor : "bg-muted"}`} />
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Strength: <span className="font-medium text-foreground">{strengthLabel}</span> · Tip: mix letters, numbers & a symbol.
+                </p>
+              </div>
+            )}
           </motion.div>
 
           <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.42 }}>
