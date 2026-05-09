@@ -109,11 +109,23 @@ export default function Register() {
           <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.34 }}>
             <Label htmlFor="pwd">Password</Label>
             <div className="relative mt-1.5">
-              <Input id="pwd" type={show ? "text" : "password"} required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="h-12 rounded-xl pr-11" />
+              <Input id="pwd" type={show ? "text" : "password"} required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} className="h-12 rounded-xl pr-11" placeholder="At least 8 characters" />
               <button type="button" onClick={() => setShow((s) => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                 {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
+            {password && (
+              <div className="mt-2">
+                <div className="flex gap-1">
+                  {[0,1,2,3].map(i => (
+                    <div key={i} className={`h-1.5 flex-1 rounded-full transition-colors ${i < strength ? strengthColor : "bg-muted"}`} />
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Strength: <span className="font-medium text-foreground">{strengthLabel}</span> · Tip: mix letters, numbers & a symbol.
+                </p>
+              </div>
+            )}
           </motion.div>
 
           <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.42 }}>
