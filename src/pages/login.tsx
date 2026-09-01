@@ -379,7 +379,9 @@ export default function Login() {
 
             <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.4 }}>
               <Button
+                type="submit"
                 disabled={loading}
+
                 className="relative w-full h-12 rounded-xl bg-gradient-primary border-0 shadow-glow text-base font-semibold overflow-hidden group hover:shadow-elevated transition-shadow"
               >
                 <span className="absolute inset-0 bg-white/20 opacity-0 group-active:opacity-100 group-active:scale-150 rounded-full transition-all duration-500" />
