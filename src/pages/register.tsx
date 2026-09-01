@@ -31,37 +31,35 @@ export default function Register() {
   const strengthLabel = ["Too weak", "Weak", "Okay", "Strong", "Very strong"][strength];
   const strengthColor = ["bg-destructive", "bg-destructive", "bg-warning", "bg-secondary", "bg-secondary"][strength];
 
-  const friendly = (msg: string) => {
-    const m = msg.toLowerCase();
-    if (m.includes("weak") || m.includes("pwned")) return "This password is too common. Try adding numbers, symbols, or making it longer.";
-    if (m.includes("already") || m.includes("registered")) return "This email is already registered. Please sign in instead.";
-    if (m.includes("invalid") && m.includes("email")) return "Please enter a valid email address.";
-    if (m.includes("rate")) return "Too many attempts. Please wait a moment and try again.";
-    return msg;
-  };
-
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirm) return toast.error("Passwords don't match");
     if (password.length < 8) return toast.error("Password must be at least 8 characters");
+    const cfg = configError();
+    if (cfg) return toast.error(cfg);
     setLoading(true);
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email, password,
-        options: { emailRedirectTo: `${window.location.origin}/home`, data: { name, phone } },
-      });
+      const { data, error } = await withRetry(() =>
+        supabase.auth.signUp({
+          email: email.trim(),
+          password,
+          options: { emailRedirectTo: `${window.location.origin}/home`, data: { name, phone } },
+        }),
+      );
       if (error) throw error;
       updateProfile({ name, email, phone });
       // Auto sign-in fallback if no session returned
       if (!data.session) {
-        await supabase.auth.signInWithPassword({ email, password });
+        const { error: siErr } = await withRetry(() => supabase.auth.signInWithPassword({ email: email.trim(), password }));
+        if (siErr) throw siErr;
       }
       toast.success("Welcome to DoctorKhoj!");
       nav("/home");
     } catch (err: any) {
-      toast.error(friendly(err.message || "Registration failed"));
+      toast.error(await authErrorMessage(err, "signup"));
     } finally { setLoading(false); }
   };
+
 
   const fields = [
     { id: "name", label: "Full name", value: name, set: setName, type: "text", placeholder: "Jane Doe" },
