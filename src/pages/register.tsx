@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/store/app";
 import { toast } from "sonner";
+import { authErrorMessage, configError, withRetry } from "@/lib/auth-errors";
+
 
 export default function Register() {
   const nav = useNavigate();
