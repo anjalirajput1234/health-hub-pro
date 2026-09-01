@@ -133,7 +133,7 @@ export default function Register() {
             <Input id="confirm" type={show ? "text" : "password"} required minLength={6} value={confirm} onChange={(e) => setConfirm(e.target.value)} className="mt-1.5 h-12 rounded-xl" />
           </motion.div>
 
-          <Button disabled={loading} className="w-full h-12 rounded-xl bg-gradient-primary border-0 shadow-glow text-base font-semibold mt-2">
+          <Button type="submit" disabled={loading} className="w-full h-12 rounded-xl bg-gradient-primary border-0 shadow-glow text-base font-semibold mt-2">
             {loading ? "Creating account…" : "Create account"}
           </Button>
 
