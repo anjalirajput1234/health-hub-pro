@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { authErrorMessage, configError, withRetry } from "@/lib/auth-errors";
+
 import heroImg from "@/assets/login-hero.jpg";
 
 export default function Login() {
@@ -18,28 +20,23 @@ export default function Login() {
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const friendly = (msg: string) => {
-    const m = msg.toLowerCase();
-    if (m.includes("invalid") && m.includes("credential")) return "Email or password is incorrect. New here? Create an account.";
-    if (m.includes("not confirmed") || m.includes("confirm")) return "Please confirm your email first, then sign in.";
-    if (m.includes("rate")) return "Too many attempts. Please wait a moment and try again.";
-    return msg;
-  };
-
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const cfg = configError();
+    if (cfg) return toast.error(cfg);
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await withRetry(() => supabase.auth.signInWithPassword({ email: email.trim(), password }));
       if (error) throw error;
       toast.success("Welcome back!");
       nav(from, { replace: true });
     } catch (err: any) {
-      toast.error(friendly(err.message || "Sign-in failed"));
+      toast.error(await authErrorMessage(err, "login"));
     } finally {
       setLoading(false);
     }
   };
+
 
   const googleSignIn = () =>
     toast.info("Google sign-in UI ready — connect provider in Cloud settings.");
@@ -382,7 +379,9 @@ export default function Login() {
 
             <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.4 }}>
               <Button
+                type="submit"
                 disabled={loading}
+
                 className="relative w-full h-12 rounded-xl bg-gradient-primary border-0 shadow-glow text-base font-semibold overflow-hidden group hover:shadow-elevated transition-shadow"
               >
                 <span className="absolute inset-0 bg-white/20 opacity-0 group-active:opacity-100 group-active:scale-150 rounded-full transition-all duration-500" />
